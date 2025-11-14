@@ -112,6 +112,16 @@ Protocols
 
 ---
 
+Category,Feature / Protocol,Trigger Keyword(s)
+Protocol,Vehicle Accident (MVA),"accident, crash, MVA, 10-50"
+Protocol,Shots Fired,"shots fired, officer down, i got shot, 10-31"
+Protocol,Natural Disaster,"earthquake, disaster, seismic"
+Protocol,Robbery in Progress,"robbery, in progress, 10-34"
+Command,Tactical Debrief,"Virgo, debrief me"
+Command,Summarization,"Virgo, summarize comms"
+Command,Log System,"Virgo, take a note"
+Command,Force Stop,Over and Out
+
 ## Architecture & Technology
 
 The system is built on a modular, "no credit card" stack, with each component chosen for a specific purpose.
