@@ -1,10 +1,3 @@
-Got it. That's a great idea. A "How to Use" guide makes the demo much easier for someone to test.
-
-I've added a new section, "How to Use (Demo Guide)," right after the "Core Features" section and included your images.
-
-Here is the final, complete `README.md` file.
-
----
 
 # ♍ Virgo's Whisper AI
 
