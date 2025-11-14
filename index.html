@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virgo's Whisper AI (Demo)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: radial-gradient(ellipse at center, #1a2947 0%, #0d1b2a 50%, #050a14 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- STYLES FROM YOUR DESIGN --- */
+        /* Animated stars background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Zodiac Wheel Container */
+        .zodiac-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zodiac-wheel {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            animation: rotate 180s linear infinite;
+            filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.4));
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Circles */
+        .wheel-outer {
+            width: 100%; height: 100%;
+            border: 3px solid rgba(59, 130, 246, 0.5);
+            border-radius: 50%; position: absolute;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.3), inset 0 0 40px rgba(59, 130, 246, 0.15);
+        }
+        .wheel-middle {
+            width: 85%; height: 85%;
+            border: 2px solid rgba(59, 130, 246, 0.4);
+            border-radius: 50%; position: absolute;
+            top: 7.5%; left: 7.5%;
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.25);
+        }
+        .wheel-inner {
+            width: 70%; height: 70%;
+            border: 2px solid rgba(59, 130, 246, 0.35);
+            border-radius: 50%; position: absolute;
+            top: 15%; left: 15%;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        .wheel-center {
+            width: 40%; height: 40%;
+            border: 2px solid rgba(59, 130, 246, 0.6);
+            border-radius: 50%; position: absolute;
+            top: 30%; left: 30%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4), inset 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Virgo Lady (z-index: 5) */
+        .virgo-lady {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 400px;
+            opacity: 0.5;
+            filter: drop-shadow(0 0 25px rgba(147, 197, 253, 0.7));
+            animation: ladyGlow 5s ease-in-out infinite;
+            z-index: 5; /* Behind the UI */
+        }
+
+        @keyframes ladyGlow {
+            0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 20px rgba(147, 197, 253, 0.6)); }
+            50% { opacity: 0.6; filter: drop-shadow(0 0 35px rgba(147, 197, 253, 0.9)); }
+        }
+
+        /* Radial lines */
+        .radial-line {
+            position: absolute; width: 2px; height: 50%;
+            background: linear-gradient(to bottom, rgba(59, 130, 246, 0.3), transparent);
+            top: 0; left: 50%;
+            transform-origin: bottom center;
+        }
+
+        /* Nebula effects */
+        .nebula {
+            position: absolute; border-radius: 50%;
+            filter: blur(60px); opacity: 0.15;
+            animation: float 20s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.2); }
+        }
+        .nebula1 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, #3b82f6, transparent);
+            top: -100px; left: -100px;
+        }
+        .nebula2 {
+            width: 350px; height: 350px;
+            background: radial-gradient(circle, #60a5fa, transparent);
+            bottom: -80px; right: -80px;
+            animation-delay: -10s;
+        }
+
+        /* --- (NEW) OUR UI STYLES --- */
+
+        /* This is the "central black box" */
+        #ui-container {
+            position: relative; /* Sits in the center */
+            z-index: 10; /* Sits on top of the Virgo Lady */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            
+            background: rgba(0, 0, 0, 0.65); /* Darker semi-transparent black */
+            
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Visualizer container */
+        .visualizer-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px; 
+        }
+
+        /* Visualizer canvas */
+        #visualizerCanvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            pointer-events: none;
+            z-index: 1; /* Behind button */
+        }
+
+        #recordButton {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 2px solid rgba(59, 130, 246, 0.7);
+            background-color: rgba(13, 27, 42, 0.7); 
+            backdrop-filter: blur(5px);
+            
+            color: #60a5fa; /* Bright, clear color */
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'Georgia', serif; /* Match body */
+            cursor: pointer;
+            text-shadow: 0 0 15px rgba(59, 130, 246, 1);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4), inset 0 0 30px rgba(59, 130, 246, 0.2);
+            transition: all 0.2s;
+            position: relative; 
+            z-index: 2; /* On top of canvas */
+        }
+
+        #recordButton:hover {
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.7), inset 0 0 40px rgba(59, 130, 246, 0.4);
+            color: #f2f2f7;
+        }
+        
+        #recordButton.recording {
+            border-color: rgba(255, 59, 48, 0.7);
+            color: #FF3B30;
+            text-shadow: 0 0 15px rgba(255, 59, 48, 1);
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 30px rgba(255, 59, 48, 0.4), inset 0 0 30px rgba(255, 59, 48, 0.2); }
+            50% { box-shadow: 0 0 50px rgba(255, 59, 48, 0.8), inset 0 0 40px rgba(255, 59, 48, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(255, 59, 48, 0.4), inset 0 0 30px rgba(255, 59, 48, 0.2); }
+        }
+
+        #statusText {
+            font-size: 1rem;
+            color: #8e8e93;
+            min-height: 1.2rem;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        
+        /* --- (THIS IS THE FIRST CHANGE) --- */
+        #responsePlayer {
+            /* Player is hidden, but still exists for the visualizer */
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="nebula nebula1"></div>
+    <div class="nebula nebula2"></div>
+
+    <div class="zodiac-container">
+        
+        <div class="zodiac-wheel">
+            <div class="radial-line" style="transform: rotate(0deg);"></div>
+            <div class="radial-line" style="transform: rotate(30deg);"></div>
+            <div class="radial-line" style="transform: rotate(60deg);"></div>
+            <div class="radial-line" style="transform: rotate(90deg);"></div>
+            <div class="radial-line" style="transform: rotate(120deg);"></div>
+            <div class="radial-line" style="transform: rotate(150deg);"></div>
+            <div class="wheel-outer"></div>
+            <div class="wheel-middle"></div>
+            <div class="wheel-inner"></div>
+            <div class="wheel-center"></div>
+        </div>
+
+        <svg class="virgo-lady" viewBox="0 0 300 350" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 140 40 Q 130 20 140 10 Q 145 5 150 8 Q 155 3 160 8 Q 165 5 170 10 Q 180 20 170 40 Q 175 60 170 80 L 165 90 Q 160 85 155 80 Q 150 75 145 80 Q 140 85 135 90 L 130 80 Q 125 60 130 40 Z" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 145 85 Q 140 120 135 160 Q 133 180 138 200" fill="none" stroke="rgba(147, 197, 253, 0.5)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 155 85 Q 150 120 145 160 Q 143 180 145 200" fill="none" stroke="rgba(147, 197, 253, 0.5)" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="150" cy="55" rx="18" ry="22" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5"/>
+            <path d="M 150 77 L 150 95" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 150 95 Q 155 110 160 130 Q 162 150 160 170 Q 158 190 152 210" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 150 100 Q 130 110 115 125 Q 105 135 100 150" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 152 100 Q 170 115 180 140 Q 185 155 185 170" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 160 170 Q 170 175 180 185 Q 190 200 195 220 Q 198 240 195 260" fill="none" stroke="rgba(147, 197, 253, 0.5)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 152 210 Q 165 215 180 215 Q 195 213 205 220" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 152 215 Q 140 230 135 250 Q 132 270 135 290" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 135 290 Q 130 310 125 325" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 125 325 Q 115 328 105 325 Q 100 323 100 320" fill="none" stroke="rgba(147, 197,253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 205 220 Q 215 240 220 265 Q 223 285 220 305" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 220 305 Q 210 315 195 320 Q 185 323 180 320" fill="none" stroke="rgba(147, 197, 253, 0.6)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 165 180 Q 175 190 185 205" fill="none" stroke="rgba(147, 197, 253, 0.4)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 170 195 Q 180 210 188 230" fill="none" stroke="rgba(147, 197, 253, 0.4)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+
+        <div id="ui-container">
+            <div class="visualizer-container">
+                <canvas id="visualizerCanvas"></canvas>
+                <button id="recordButton">Hold</button>
+            </div>
+            <p id="statusText">Hold the button to record</p>
+            </div>
+
+    </div>
+
+    <script>
+        // --- (SCRIPT 1) Generate random stars ---
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            const size = Math.random() * 2.5 + 0.5;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // --- (SCRIPT 2) All our app functionality ---
+
+        // --- 1. Get our HTML elements ---
+        const recordButton = document.getElementById('recordButton');
+        const statusText = document.getElementById('statusText');
+        const uiContainer = document.getElementById('ui-container');
+        // Get canvas elements
+        const canvas = document.getElementById('visualizerCanvas');
+        const canvasCtx = canvas.getContext('2d');
+
+        // --- 2. Setup variables ---
+        let mediaRecorder; // The main object that will record audio
+        let audioChunks = []; // An array to store the chunks of audio
+        
+        // Visualizer variables
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let bufferLength;
+        let animationFrameId;
+        let mediaSource;
+        let playbackSource;
+
+        // --- 3. The "Press and Hold" Logic ---
+
+        // When the user presses the mouse button down
+        recordButton.addEventListener('mousedown', async () => {
+            // Ask for microphone permission
+            try {
+                // Find and remove any old audio player
+                document.getElementById('responsePlayer')?.remove();
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Set up visualizer for *microphone*
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                mediaSource = audioContext.createMediaStreamSource(stream);
+                mediaSource.connect(analyser);
+                
+                setupAnalyser();
+                drawVisualizer(); // Start the visualizer loop
+
+                // --- Start Recording ---
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = []; // Clear any old audio chunks
+
+                // When a chunk of audio is ready, add it to our array
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    audioChunks.push(event.data);
+                });
+
+                // When the recording stops, this event fires
+                mediaRecorder.addEventListener('stop', () => {
+                    // Combine all the audio chunks into a single "Blob"
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                    
+                    // --- Send the audio blob to our server ---
+                    console.log("Recording stopped. Uploading audio...");
+                    statusText.textContent = "Processing...";
+                    uploadAudio(audioBlob); // Call the upload function
+                    
+                    // Reset the UI
+                    recordButton.classList.remove('recording');
+                    recordButton.textContent = "Hold";
+                });
+
+                // Start the recording!
+                mediaRecorder.start();
+
+                // Update the UI
+                recordButton.classList.add('recording'); // Makes button red
+                recordButton.textContent = "Rec";
+                statusText.textContent = "Recording... Release to stop.";
+
+            } catch (err) {
+                console.error("Error getting audio:", err);
+                statusText.textContent = "Error: Could not access microphone.";
+            }
+        });
+
+        // When the user releases the mouse button
+        recordButton.addEventListener('mouseup', () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                // Stop the recording
+                mediaRecorder.stop();
+                
+                // Stop the visualizer
+                if (audioContext) {
+                    audioContext.close(); // Release the mic
+                }
+                cancelAnimationFrame(animationFrameId);
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        });
+
+        // --- 4. The "Upload Audio" Function ---
+        async function uploadAudio(audioBlob) {
+            
+            const serverUrl = "http://ShashwatBalodhi.pythonanywhere.com/analyze-audio-file";
+
+            // Create a FormData object to send the file
+            const formData = new FormData();
+            formData.append('audio_file', audioBlob, 'recording.mp3'); 
+
+            try {
+                // Send the POST request to our server
+                const response = await fetch(serverUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // --- 5. Handle the Server's Response ---
+                if (response.status === 200) {
+                    // SUCCESS (Stress or Summary)
+                    statusText.textContent = "Response received!";
+                    const audioBlobResponse = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlobResponse);
+                    
+                    // Create a new audio element
+                    const audio = new Audio(audioUrl);
+                    // --- (THIS IS THE SECOND CHANGE) ---
+                    audio.controls = false; // Player is invisible
+                    audio.id = "responsePlayer"; // Give it an ID so we can remove it
+                    
+                    // (NEW) Add the player to our UI container (it's hidden by CSS)
+                    uiContainer.appendChild(audio);
+
+                    // Set up visualizer for *playback*
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    playbackSource = audioContext.createMediaElementSource(audio);
+                    playbackSource.connect(analyser);
+                    analyser.connect(audioContext.destination); // Connect to speakers
+                    
+                    setupAnalyser();
+
+                    // Add event listeners to control text and visualizer
+                    audio.onplay = () => {
+                        console.log("Playback started...");
+                        recordButton.textContent = "Virgo"; // Change text
+                        drawVisualizer(); // Start visualizer
+                    };
+                    audio.onended = () => {
+                        console.log("Playback ended.");
+                        recordButton.textContent = "Hold"; // Reset text
+                        cancelAnimationFrame(animationFrameId);
+                        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                        audioContext.close();
+                    };
+
+                    // Try to play it
+                    audio.play(); 
+
+                } else if (response.status === 204) {
+                    // SUCCESS (No Stress)
+                    statusText.textContent = "All clear. (No stress detected)";
+                    recordButton.textContent = "Hold"; // Reset text
+                
+                } else {
+                    // ERROR (500, 400, etc.)
+                    const errorData = await response.json();
+                    console.error("Server error:", errorData);
+                    statusText.textContent = `Error: ${errorData.error}`;
+                    recordButton.textContent = "Hold"; // Reset text
+                }
+
+            } catch (err) {
+                console.error("Error uploading audio:", err);
+                statusText.textContent = "Error: Could not connect to server.";
+                recordButton.textContent = "Hold"; // Reset text
+            }
+        }
+        
+        // --- 6. (NEW) Visualizer Helper Functions ---
+        function setupAnalyser() {
+            analyser.fftSize = 256;
+            bufferLength = analyser.frequencyBinCount; // (e.g., 128)
+            dataArray = new Uint8Array(bufferLength);
+            
+            // Set canvas size (needs to match CSS)
+            canvas.width = 200;
+            canvas.height = 200;
+        }
+
+        function drawVisualizer() {
+            // Loop the animation
+            animationFrameId = requestAnimationFrame(drawVisualizer);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Clear the canvas
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Move origin to the center
+            canvasCtx.save();
+            canvasCtx.translate(canvas.width / 2, canvas.height / 2);
+            
+            const innerRadius = 75; // 150 / 2 (button size)
+            const maxBarHeight = 25; // (200 - 150) / 2
+            const sliceAngle = (Math.PI * 2) / bufferLength;
+
+            // Check if recording to set color
+            const isRecording = recordButton.classList.contains('recording');
+            const color = isRecording ? 'rgba(255, 59, 48, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+            canvasCtx.strokeStyle = color;
+            canvasCtx.lineWidth = 2;
+
+            for (let i = 0; i < bufferLength; i++) {
+                // Scale data (0-255) to bar height (0-25)
+                const barHeight = (dataArray[i] / 255) * maxBarHeight;
+                
+                // Calculate start and end points
+                const angle = i * sliceAngle;
+                const x1 = Math.cos(angle) * (innerRadius + 2); // Start just outside the button
+                const y1 = Math.sin(angle) * (innerRadius + 2);
+                const x2 = Math.cos(angle) * (innerRadius + barHeight);
+                const y2 = Math.sin(angle) * (innerRadius + barHeight);
+                
+                // Draw the bar
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(x1, y1);
+                canvasCtx.lineTo(x2, y2);
+                canvasCtx.stroke();
+            }
+            
+            canvasCtx.restore();
+        }
+
+    </script>
+</body>
+</html>
