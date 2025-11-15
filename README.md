@@ -175,8 +175,3 @@ Keywords: `"robbery"`, `"in progress"`, `"10-34"`
 # 🛡️ **Virgo’s Whisper AI**  
 ### _A calm, intelligent partner in the moments that matter most._
 
-If you'd like, I can also:  
-✅ Add badges  
-✅ Add images / banners  
-✅ Create a logo  
-✅ Auto-generate a GitHub-ready README layout  
