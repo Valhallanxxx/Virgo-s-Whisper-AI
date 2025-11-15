@@ -98,6 +98,8 @@ If calm:
 
 Use the `index.html` demo and hold the talk button.
 
+Demo video:  https://youtu.be/kPvWO0YECD0 
+
 ---
 
 ## 😌 **1. Passive Listening**
